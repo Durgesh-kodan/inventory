@@ -215,7 +215,7 @@ export type ProductGroupByOutputType = {
   id: string
   userId: string
   name: string
-  sku: string
+  sku: string | null
   price: runtime.Decimal
   quantity: number
   lowStockAt: number | null
@@ -250,7 +250,7 @@ export type productWhereInput = {
   id?: Prisma.StringFilter<"product"> | string
   userId?: Prisma.StringFilter<"product"> | string
   name?: Prisma.StringFilter<"product"> | string
-  sku?: Prisma.StringFilter<"product"> | string
+  sku?: Prisma.StringNullableFilter<"product"> | string | null
   price?: Prisma.DecimalFilter<"product"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFilter<"product"> | number
   lowStockAt?: Prisma.IntNullableFilter<"product"> | number | null
@@ -262,7 +262,7 @@ export type productOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  sku?: Prisma.SortOrder
+  sku?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   lowStockAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -289,7 +289,7 @@ export type productOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  sku?: Prisma.SortOrder
+  sku?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   lowStockAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -309,7 +309,7 @@ export type productScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"product"> | string
   userId?: Prisma.StringWithAggregatesFilter<"product"> | string
   name?: Prisma.StringWithAggregatesFilter<"product"> | string
-  sku?: Prisma.StringWithAggregatesFilter<"product"> | string
+  sku?: Prisma.StringNullableWithAggregatesFilter<"product"> | string | null
   price?: Prisma.DecimalWithAggregatesFilter<"product"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntWithAggregatesFilter<"product"> | number
   lowStockAt?: Prisma.IntNullableWithAggregatesFilter<"product"> | number | null
@@ -321,7 +321,7 @@ export type productCreateInput = {
   id?: string
   userId: string
   name: string
-  sku: string
+  sku?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
   lowStockAt?: number | null
@@ -333,7 +333,7 @@ export type productUncheckedCreateInput = {
   id?: string
   userId: string
   name: string
-  sku: string
+  sku?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
   lowStockAt?: number | null
@@ -345,7 +345,7 @@ export type productUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  sku?: Prisma.StringFieldUpdateOperationsInput | string
+  sku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   lowStockAt?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -357,7 +357,7 @@ export type productUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  sku?: Prisma.StringFieldUpdateOperationsInput | string
+  sku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   lowStockAt?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -369,7 +369,7 @@ export type productCreateManyInput = {
   id?: string
   userId: string
   name: string
-  sku: string
+  sku?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
   lowStockAt?: number | null
@@ -381,7 +381,7 @@ export type productUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  sku?: Prisma.StringFieldUpdateOperationsInput | string
+  sku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   lowStockAt?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -393,7 +393,7 @@ export type productUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  sku?: Prisma.StringFieldUpdateOperationsInput | string
+  sku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   lowStockAt?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -451,6 +451,10 @@ export type productSumOrderByAggregateInput = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type DecimalFieldUpdateOperationsInput = {
@@ -540,7 +544,7 @@ export type $productPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     userId: string
     name: string
-    sku: string
+    sku: string | null
     price: runtime.Decimal
     quantity: number
     lowStockAt: number | null

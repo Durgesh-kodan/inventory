@@ -30,7 +30,7 @@ const {
   Public,
   getRuntime,
   createParam,
-} = require('./runtime/wasm-compiler-edge.js')
+} = require('./runtime/client.js')
 
 
 const Prisma = {}
@@ -81,6 +81,7 @@ Prisma.NullTypes = NullTypes
 
 
 
+  const path = require('path')
 
 /**
  * Enums
@@ -131,7 +132,7 @@ const config = {
   "clientVersion": "7.8.0",
   "engineVersion": "3c6e192761c0362d496ed980de936e2f3cebcd3a",
   "activeProvider": "postgresql",
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Get a free hosted Postgres database in seconds: `npx create-db`\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"./src/generated\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel product {\n  id         String  @id @default(cuid())\n  userId     String\n  name       String\n  sku        String  @unique\n  price      Decimal @db.Decimal(12, 2)\n  quantity   Int     @default(0)\n  lowStockAt Int?\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  @@index([userId, name])\n  @@index([createdAt])\n}\n"
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel product {\n  id         String   @id @default(cuid())\n  userId     String\n  name       String\n  sku        String   @unique\n  price      Decimal  @db.Decimal(12, 2)\n  quantity   Int      @default(0)\n  lowStockAt Int?\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n\n  @@index([userId, name])\n  @@index([createdAt])\n}\n"
 }
 
 config.runtimeDataModel = JSON.parse("{\"models\":{\"product\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sku\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"quantity\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"lowStockAt\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
@@ -141,17 +142,16 @@ config.parameterizationSchema = {
   graph: "PAsQDBwAACwAMB0AAAQAEB4AACwAMB8BAAAAASABAC0AISEBAC0AISIBAAAAASMQAC4AISQCAC8AISUCADAAISZAADEAISdAADEAIQEAAAABACABAAAAAQAgDBwAACwAMB0AAAQAEB4AACwAMB8BAC0AISABAC0AISEBAC0AISIBAC0AISMQAC4AISQCAC8AISUCADAAISZAADEAISdAADEAIQElAAAyACADAAAABAAgAwAABQAwBAAAAQAgAwAAAAQAIAMAAAUAMAQAAAEAIAMAAAAEACADAAAFADAEAAABACAJHwEAAAABIAEAAAABIQEAAAABIgEAAAABIxAAAAABJAIAAAABJQIAAAABJkAAAAABJ0AAAAABAQgAAAkAIAkfAQAAAAEgAQAAAAEhAQAAAAEiAQAAAAEjEAAAAAEkAgAAAAElAgAAAAEmQAAAAAEnQAAAAAEBCAAACwAwAQgAAAsAMAkfAQA4ACEgAQA4ACEhAQA4ACEiAQA4ACEjEAA5ACEkAgA6ACElAgA7ACEmQAA8ACEnQAA8ACECAAAAAQAgCAAADgAgCR8BADgAISABADgAISEBADgAISIBADgAISMQADkAISQCADoAISUCADsAISZAADwAISdAADwAIQIAAAAEACAIAAAQACACAAAABAAgCAAAEAAgAwAAAAEAIA8AAAkAIBAAAA4AIAEAAAABACABAAAABAAgBhUAADMAIBYAADQAIBcAADcAIBgAADYAIBkAADUAICUAADIAIAwcAAAaADAdAAAXABAeAAAaADAfAQAbACEgAQAbACEhAQAbACEiAQAbACEjEAAcACEkAgAdACElAgAeACEmQAAfACEnQAAfACEDAAAABAAgAwAAFgAwFAAAFwAgAwAAAAQAIAMAAAUAMAQAAAEAIAwcAAAaADAdAAAXABAeAAAaADAfAQAbACEgAQAbACEhAQAbACEiAQAbACEjEAAcACEkAgAdACElAgAeACEmQAAfACEnQAAfACEOFQAAIQAgGAAAKwAgGQAAKwAgKAEAAAABKQEAAAAEKgEAAAAEKwEAAAABLAEAAAABLQEAAAABLgEAAAABLwEAKgAhMAEAAAABMQEAAAABMgEAAAABDRUAACEAIBYAACkAIBcAACkAIBgAACkAIBkAACkAICgQAAAAASkQAAAABCoQAAAABCsQAAAA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"
 }
 config.compilerWasm = {
-  getRuntime: async () => require('./query_compiler_fast_bg.js'),
-  getQueryCompilerWasmModule: async () => {
-    const loader = (await import('#wasm-compiler-loader')).default
-    const compiler = (await loader).default
-    return compiler
-  },
-  importName: './query_compiler_fast_bg.js',
-}
-if (typeof globalThis !== 'undefined' && globalThis['DEBUG'] || (typeof process !== 'undefined' && process.env && process.env.DEBUG) || undefined) {
-  Debug.enable(typeof globalThis !== 'undefined' && globalThis['DEBUG'] || (typeof process !== 'undefined' && process.env && process.env.DEBUG) || undefined)
-}
+      getRuntime: async () => require('./query_compiler_fast_bg.js'),
+      getQueryCompilerWasmModule: async () => {
+        const { Buffer } = require('node:buffer')
+        const { wasm } = require('./query_compiler_fast_bg.wasm-base64.js')
+        const queryCompilerWasmFileBytes = Buffer.from(wasm, 'base64')
+
+        return new WebAssembly.Module(queryCompilerWasmFileBytes)
+      },
+      importName: './query_compiler_fast_bg.js',
+    }
 
 const PrismaClient = getPrismaClient(config)
 exports.PrismaClient = PrismaClient

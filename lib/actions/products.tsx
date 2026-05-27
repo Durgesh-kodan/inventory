@@ -6,44 +6,52 @@ import { prisma } from "../prisma";
 import { z } from "zod";
 
 const ProductSchema = z.object({
-  name: z.string().min(1, "Product name is required"),
-  price: z.coerce.number().nonnegative("Price must be a non-negative number"),
-  quantity: z.coerce.number().int().min(0, "Quantity must be a non-negative integer"),
+  name: z.string().min(1, "Name is required"),
+  price: z.coerce.number().nonnegative("Price must be non-negative"),
+  quantity: z.coerce.number().int().min(0, "Quantity must be non-negative"),
   sku: z.string().optional(),
   lowStockAt: z.coerce.number().int().min(0).optional(),
 });
 
-export default async function deleteProduct(formData: FormData) {
+export async function deleteProduct(formData: FormData) {
   const user = await getCurrentUser();
   const id = String(formData.get("id") || "");
+
   await prisma.product.deleteMany({
-    where: { id: id, userId: user?.id || "" },
+    where: { id: id, userId: user.id },
   });
 }
 
 export async function createProduct(formData: FormData) {
   const user = await getCurrentUser();
+
   const parsed = ProductSchema.safeParse({
     name: formData.get("name"),
     price: formData.get("price"),
     quantity: formData.get("quantity"),
-    sku: formData.get("sku"),
+    sku: formData.get("sku") || undefined,
     lowStockAt: formData.get("lowStockAt") || undefined,
   });
 
   if (!parsed.success) {
-    throw new Error("Invalid product data");
+    throw new Error("Validation failed");
   }
+
   try {
+    const productData = {
+      name: parsed.data.name,
+      price: parsed.data.price,
+      quantity: parsed.data.quantity,
+      userId: user.id,
+      ...(parsed.data.sku !== undefined ? { sku: parsed.data.sku } : {}),
+      ...(parsed.data.lowStockAt !== undefined ? { lowStockAt: parsed.data.lowStockAt } : {}),
+    };
+
     await prisma.product.create({
-      data: {
-        ...parsed.data,
-        userId: user?.id || "",
-      },
+      data: productData,
     });
     redirect("/inventory");
   } catch (error) {
-    console.error("Error creating product:", error);
-    throw new Error("Failed to create product");
+    throw new Error("Failed to create product.");
   }
 }
