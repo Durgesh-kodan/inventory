@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "../auth";
 import { prisma } from "../prisma";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
 const ProductSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -20,6 +21,7 @@ export async function deleteProduct(formData: FormData) {
   await prisma.product.deleteMany({
     where: { id: id, userId: user.id },
   });
+  revalidatePath("/inventory");
 }
 
 export async function createProduct(formData: FormData) {
@@ -38,20 +40,11 @@ export async function createProduct(formData: FormData) {
   }
 
   try {
-    const productData = {
-      name: parsed.data.name,
-      price: parsed.data.price,
-      quantity: parsed.data.quantity,
-      userId: user.id,
-      ...(parsed.data.sku !== undefined ? { sku: parsed.data.sku } : {}),
-      ...(parsed.data.lowStockAt !== undefined ? { lowStockAt: parsed.data.lowStockAt } : {}),
-    };
-
     await prisma.product.create({
-      data: productData,
+      data: { ...parsed.data, userId: user.id },
     });
-    redirect("/inventory");
   } catch (error) {
     throw new Error("Failed to create product.");
   }
+  redirect("/inventory");
 }

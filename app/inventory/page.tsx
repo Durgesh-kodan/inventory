@@ -3,6 +3,7 @@ import Sidebar from "@/components/sidebar";
 import { deleteProduct } from "@/lib/actions/products";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
 export default async function InventoryPage({
   searchParams,
@@ -33,6 +34,14 @@ export default async function InventoryPage({
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+if (page > totalPages) {
+  redirect(
+    q
+      ? `/inventory?q=${encodeURIComponent(q)}&page=${totalPages}`
+      : `/inventory?page=${totalPages}`
+  );
+}
 
   return (
     <div className="min-h-screen bg-gray-50">
