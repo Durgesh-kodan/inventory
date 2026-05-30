@@ -1,6 +1,8 @@
+
+import AccountSettingsClient from "@/components/account-settings";
 import Sidebar from "@/components/sidebar";
 import { getCurrentUser } from "@/lib/auth";
-import { AccountSettings } from "@stackframe/stack";
+
 
 export default async function SettingsPage() {
   const user = await getCurrentUser();
@@ -21,7 +23,7 @@ export default async function SettingsPage() {
         </div>
         <div className="max-w-6xl ">
           <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <AccountSettings fullPage />
+            <AccountSettingsClient />
           </div>
         </div>
       </main>
